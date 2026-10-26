@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block title %}Notifications · ARINEX{% endblock %}
+{% block content %}<section class="page-heading"><p class="eyebrow">UPDATES</p><h1>Notifications</h1><p>New payment updates and access changes appear here.</p></section>{% if notifications %}<div class="notification-list">{% for n in notifications %}<article class="notification-item"><h3>{{ n['title'] }}</h3><p>{{ n['message'] }}</p><time>{{ n['created_at'] }}</time></article>{% endfor %}</div>{% else %}<div class="empty-state">You're all caught up.</div>{% endif %}{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}{% block title %}Dashboard · ARINEX{% endblock %}
+{% block content %}
+<section class="page-heading"><p class="eyebrow">STUDENT DASHBOARD</p><h1>Welcome, {{ current_user['username'] }}.</h1><p>Pick up your preparation from here.</p></section>
+<div class="stats-grid"><div class="stat-card"><span>Completed attempts</span><strong>{{ total_attempts }}</strong></div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <span>Best Practice score</span>
+        {% if practice_best is not none %}
+            <strong>{{ practice_best }}%</strong>
+            <span>{{ practice_scaled }}/400 scaled</span>
+        {% else %}
+            <strong>—</strong>
+            <span>No completed Practice yet</span>
+        {% endif %}
+    </div>
+
+    <div class="stat-card">
+        <span>Best Mock Exam score</span>
+        {% if mock_best is not none %}
+            <strong>{{ mock_best }}%</strong>
+            <span>{{ mock_scaled }}/400 scaled</span>
+        {% else %}
+            <strong>—</strong>
+            <span>No completed Mock Exam yet</span>
+        {% endif %}
+    </div>
+</div>
+<div class="stat-card"><span>Best score</span><strong>{{ best_score }}%</strong></div><div class="stat-card"><span>Subjects available</span><strong>{{ subjects|length }}</strong></div><div class="stat-card"><span>Study streak</span><strong>{{ streak }} day{{ '' if streak == 1 else 's' }}</strong></div></div>
+<div class="notice"><strong>Daily challenge</strong><p>Answer 10 questions today to build your study habit. You have recorded {{ today_questions }} question{{ '' if today_questions == 1 else 's' }} today.</p><p><a href="{{ url_for('analytics') }}">Track your progress</a> · <a href="{{ url_for('bookmarks') }}">Bookmarks</a> · <a href="{{ url_for('revision') }}">Wrong-answer revision</a></p></div>
+<section class="section"><div class="section-heading"><h2>Your learning sections</h2><p class="muted">Access is controlled by your current permissions.</p></div><div class="card-grid">
+<a class="feature-card feature-link" href="{{ url_for('practice') }}"><span class="feature-icon">⌁</span><h3>Practice {% if access and access['practice'] %}<span class="status-open">Unlocked</span>{% else %}<span class="status-open">2 free attempts*</span>{% endif %}</h3><p>Choose a subject and practise published questions.</p><span class="text-link">Open practice →</span></a>
+<a class="feature-card feature-link" href="{{ url_for('mock_setup') }}"><span class="feature-icon">◷</span><h3>Mock Exam {% if access and access['mock_exam'] %}<span class="status-open">Unlocked</span>{% else %}<span class="status-locked">Locked</span>{% endif %}</h3><p>180 questions in 120 minutes. English is compulsory.</p><span class="text-link">View mock exam →</span></a>
+<a class="feature-card feature-link" href="{{ url_for('classes') }}"><span class="feature-icon">▤</span><h3>Classes {% if access and access['classes'] %}<span class="status-open">Unlocked</span>{% else %}<span class="status-locked">Locked</span>{% endif %}</h3><p>Open lesson notes prepared by the administrator.</p><span class="text-link">View classes →</span></a>
+<a class="feature-card feature-link" href="{{ url_for('analytics') }}"><span class="feature-icon">↗</span><h3>Progress analytics</h3><p>Review performance by subject and recent activity.</p><span class="text-link">See progress →</span></a>
+</div><p class="muted small">*Free Practice access is limited to two attempts unless Practice is unlocked by the administrator or Premium approval.</p></section>
+<section class="section"><div class="section-heading"><h2>Recent results</h2><a href="{{ url_for('results') }}">All results →</a></div>
+
+{% if attempts %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Raw score</th>
+                <th>Percentage</th>
+                <th>Scaled score /400</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in attempts %}
+            {% set total = a['total_questions'] or 0 %}
+            {% set score = a['score'] or 0 %}
+            {% set percentage = (score * 100 / total)|round(2) if total else 0 %}
+            {% set scaled = (score * 400 / total)|round|int if total else 0 %}
+            <tr>
+                <td>{{ a['exam_type']|title }}</td>
+                <td>{{ score }}/{{ total }}</td>
+                <td>{{ percentage }}%</td>
+                <td>{{ scaled }}/400</td>
+                <td>{{ a['submitted_at'] or '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">Your completed attempts will appear here.</div>
+{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}ARINEX 2027 JAMB PREP{% endblock %}
+{% block content %}
+<section class="hero">
+ <div class="hero-copy"><p class="eyebrow">PREPARE WITH PURPOSE</p><h1>Your 2027 JAMB preparation, organised.</h1><p>Practice with your question bank, learn from classes, and prepare with a timed JAMB-style CBT mock exam.</p>
+ <div class="button-row"><a class="button" href="{{ url_for('register') }}">Get started</a><a class="button button-secondary" href="{{ url_for('login') }}">Log in</a></div>
+ <p class="muted small">Questions are added and reviewed by the administrator. No sample past questions are included.</p></div>
+ <div class="hero-card"><div class="hero-icon">A</div><h2>180 questions</h2><p>English 60 + any three other UTME subjects, 40 each.</p><div class="hero-stat"><strong>120 min</strong><span>Mock exam duration</span></div></div>
+</section>
+<section class="section"><div class="section-heading"><p class="eyebrow">YOUR LEARNING SPACE</p><h2>Tools to help you improve</h2></div>
+<div class="card-grid">
+ <article class="feature-card"><span class="feature-icon">⌁</span><h3>Practice</h3><p>Build confidence using published questions in the database.</p></article>
+ <article class="feature-card"><span class="feature-icon">◷</span><h3>Mock CBT</h3><p>Work through the JAMB-style 180-question, two-hour format.</p></article>
+ <article class="feature-card"><span class="feature-icon">▤</span><h3>Classes</h3><p>Read organised lessons and revisit topics at your pace.</p></article>
+ <article class="feature-card"><span class="feature-icon">↗</span><h3>Progress</h3><p>Review results, bookmarks and incorrect answers.</p></article>
+</div></section>
+{% endblock %}

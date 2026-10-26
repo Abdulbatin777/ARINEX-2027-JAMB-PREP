@@ -1,0 +1,111 @@
+<escape>{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .arinex-promo {
+        max-width: 850px;
+        margin: 35px auto;
+        padding: 30px 22px;
+        border-radius: 18px;
+        text-align: center;
+        background: linear-gradient(135deg, #102a43, #075e54);
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .arinex-promo .brand {
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 4px;
+        color: #a7f3d0;
+    }
+
+    .arinex-promo h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        margin: 18px 0 12px;
+    }
+
+    .arinex-promo p {
+        line-height: 1.8;
+        font-size: 16px;
+    }
+
+    .arinex-promo .services {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin: 25px 0;
+    }
+
+    .arinex-promo .service {
+        padding: 16px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        font-weight: 600;
+    }
+
+    .arinex-promo .contact-button {
+        display: inline-block;
+        margin-top: 18px;
+        padding: 14px 24px;
+        border-radius: 10px;
+        background: #25d366;
+        color: #073b2a;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .arinex-promo .contact-button:hover {
+        background: #a7f3d0;
+    }
+
+    .arinex-promo .tagline {
+        margin-top: 25px;
+        color: #a7f3d0;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+</style>
+
+<section class="arinex-promo">
+    <div class="brand">ARINEX</div>
+
+    <h1>Build Your Ideas Into Reality</h1>
+
+    <p>
+        Welcome to ARINEX — your destination for creative design
+        and modern web solutions.
+    </p>
+
+    <div class="services">
+        <div class="service">Web Development</div>
+        <div class="service">Web Applications</div>
+        <div class="service">Graphics Design</div>
+    </div>
+
+    <p>
+        Need a website, a web application, or a professional graphic design?
+        Contact ARINEX to discuss your project.
+    </p>
+
+    <escape><a class="contact-button"
+   href="https://wa.me/2347025644796"
+   target="_blank"
+   rel="noopener noreferrer">
+    Contact ARINEX on WhatsApp
+</a>
+
+<p>
+    <strong>WhatsApp Number:</strong>
+    <a href="https://wa.me/2347025644796"
+       target="_blank"
+       rel="noopener noreferrer"
+       style="color: #a7f3d0; text-decoration: underline;">
+        07025644796
+    </a>
+</p></escape>
+
+    <div class="tagline">Build. Design. Launch.</div>
+</section>
+{% endblock %}</escape>

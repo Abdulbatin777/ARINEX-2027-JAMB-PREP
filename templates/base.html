@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>{% block title %}ARINEX 2027 JAMB PREP{% endblock %}</title>
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <link rel="icon" href="{{ url_for('static', filename='icons/icon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="{{ url_for('home') }}"><span class="brand-mark">A</span><span>ARINEX <small>2027 JAMB PREP</small></span></a>
+  <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+  <nav class="nav-links">
+    <a href="{{ url_for('home') }}">Home</a>
+    {% if current_user %}
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('practice') }}">Practice</a>
+      <a href="{{ url_for('mock_setup') }}">Mock Exam</a>
+      <a href="{{ url_for('classes') }}">Classes</a>
+      <a href="{{ url_for('results') }}">Results</a>
+      <a href="{{ url_for('payments') }}">Premium</a>
+      <a href="{{ url_for('notifications') }}">Notifications{% if unread_notifications %} ({{ unread_notifications }}){% endif %}</a>
+      {% if current_user['is_admin'] %}<a href="{{ url_for('admin_dashboard') }}">Admin</a>{% endif %}
+      <form method="post" action="{{ url_for('logout') }}" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-button" type="submit">Log out</button></form>
+    {% else %}
+      <a href="{{ url_for('rules') }}">Rules</a><a href="{{ url_for('login') }}">Log in</a><a class="nav-cta" href="{{ url_for('register') }}">Create account</a>
+    {% endif %}
+  </nav>
+</header>
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="site-footer"><escape>
+<section class="arinex-promo-banner">
+  <div class="arinex-promo-content">
+    <span class="arinex-promo-label">NEED A DIGITAL SOLUTION?</span>
+    <h2>Bring Your Ideas to Life with ARINEX</h2>
+    <p>
+      Professional websites, web applications, and creative graphic design
+      to help bring your ideas to life.
+    </p>
+  </div>
+
+  <a class="arinex-promo-button"
+     href="{{ url_for('arinex_promo') }}">
+    Explore ARINEX Services &rarr;
+  </a>
+</section>
+
+<footer class="site-footer">
+  <p>© 2026 ARINEX JAMB PREP · Built by <strong>Arinex</strong></p>
+  <a href="{{ url_for('rules') }}">Rules and privacy</a>
+</footer>
+</escape>
+</body>
+</html>

@@ -1,0 +1,124 @@
+
+{% extends "base.html" %}
+
+{% block title %}Exam result · ARINEX{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <p class="eyebrow">EXAM COMPLETED</p>
+    <h1>Your {{ attempt['exam_type']|title }} result</h1>
+    <p>Submitted {{ attempt['submitted_at'] }}</p>
+</section>
+
+<div class="result-hero">
+    <div class="result-score">
+        <strong>{{ attempt['score'] }}</strong>
+        <span>out of {{ total_questions }}</span>
+    </div>
+
+    <div>
+        <p class="eyebrow">YOUR PERCENTAGE</p>
+        <h2>{{ percentage }}%</h2>
+        <p>Scaled score: <strong>{{ scaled_score }}/400</strong></p>
+    </div>
+</div>
+
+<div class="grid grid-3">
+    <div class="card">
+        <p class="muted">Correct answers</p>
+        <h2>{{ correct_count }}</h2>
+    </div>
+
+    <div class="card">
+        <p class="muted">Incorrect answers</p>
+        <h2>{{ incorrect_count }}</h2>
+    </div>
+
+    <div class="card">
+        <p class="muted">Unanswered</p>
+        <h2>{{ unanswered_count }}</h2>
+    </div>
+</div>
+
+<p class="muted">
+    The score out of 400 is a scaled practice score and is not necessarily
+    the official JAMB UTME score.
+</p>
+
+<div class="button-row">
+    <a class="button" href="{{ url_for('results') }}">View all results</a>
+    <a class="button button-secondary"
+       href="{{ url_for('revision') }}">Review wrong answers</a>
+</div>
+
+<section class="section">
+    <h2>Answer review</h2>
+
+    {% for q in details %}
+    <article class="review-card
+        {% if q['is_correct'] %}review-correct{% else %}review-wrong{% endif %}">
+
+        <div class="question-meta">
+            <span>{{ q['subject_name'] }}</span>
+            <span>
+                {% if q['is_correct'] %}
+                    Correct
+                {% elif q['selected_answer'] %}
+                    Incorrect
+                {% else %}
+                    Unanswered
+                {% endif %}
+            </span>
+        </div>
+
+        
+{% set question_source = q['source']|default('', true)|trim %}
+{% set question_year = q['exam_year']|default('', true)|trim %}
+
+<h3>{{ loop.index }}. {{ q['question_text'] }}</h3>
+
+{% if question_source or question_year %}
+<div class="question-meta question-source">
+    {% if question_source %}
+        <span>Source: {{ question_source }}</span>
+    {% endif %}
+    {% if question_year %}
+        <span>Year: {{ question_year }}</span>
+    {% endif %}
+</div>
+{% endif %}
+
+
+        <div class="review-options">
+            {% for letter in ['A', 'B', 'C', 'D'] %}
+            <p class="
+                {% if letter == q['correct_answer'] %}correct-answer
+                {% elif letter == q['selected_answer'] %}selected-wrong
+                {% endif %}">
+                <strong>{{ letter }}.</strong>
+                {{ q['option_' ~ letter|lower] }}
+                {% if letter == q['correct_answer'] %} ✓{% endif %}
+            </p>
+            {% endfor %}
+        </div>
+
+        <p class="muted">
+            Your answer: {{ q['selected_answer'] or 'No answer' }}
+            · Correct answer: {{ q['correct_answer'] }}
+        </p>
+
+        {% if q['explanation'] %}
+        <p><strong>Explanation:</strong> {{ q['explanation'] }}</p>
+        {% endif %}
+
+        <form method="post"
+              action="{{ url_for('toggle_bookmark', question_id=q['id']) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button button-ghost" type="submit">
+                ☆ Bookmark
+            </button>
+        </form>
+    </article>
+    {% endfor %}
+</section>
+{% endblock %}

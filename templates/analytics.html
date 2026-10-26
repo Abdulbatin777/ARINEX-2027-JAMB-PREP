@@ -1,0 +1,128 @@
+
+{% extends "base.html" %}
+
+{% block title %}Analytics · ARINEX{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <p class="eyebrow">YOUR PROGRESS</p>
+    <h1>Performance analytics</h1>
+    <p>Based on submitted attempts in your account.</p>
+</section>
+
+<section class="section">
+    <h2>Practice and Mock Exam scores</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span>Practice best percentage</span>
+            {% if practice_stats.best_percentage is not none %}
+                <strong>{{ practice_stats.best_percentage }}%</strong>
+                <span>Scaled score: {{ practice_stats.best_scaled }}/400</span>
+            {% else %}
+                <strong>—</strong>
+                <span>No completed Practice yet</span>
+            {% endif %}
+            <p>Average:
+                {% if practice_stats.average_percentage is not none %}
+                    {{ practice_stats.average_percentage }}%
+                    ({{ practice_stats.average_scaled }}/400 scaled)
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+            <p>Completed attempts: {{ practice_stats.attempts }}</p>
+        </div>
+
+        <div class="stat-card">
+            <span>Mock Exam best percentage</span>
+            {% if mock_stats.best_percentage is not none %}
+                <strong>{{ mock_stats.best_percentage }}%</strong>
+                <span>Scaled score: {{ mock_stats.best_scaled }}/400</span>
+            {% else %}
+                <strong>—</strong>
+                <span>No completed Mock Exam yet</span>
+            {% endif %}
+            <p>Average:
+                {% if mock_stats.average_percentage is not none %}
+                    {{ mock_stats.average_percentage }}%
+                    ({{ mock_stats.average_scaled }}/400 scaled)
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+            <p>Completed attempts: {{ mock_stats.attempts }}</p>
+        </div>
+    </div>
+
+    <p class="muted small">
+        Scores out of 400 are scaled practice scores and may not match
+        the official JAMB UTME scoring method.
+    </p>
+</section>
+
+<section class="section">
+    <h2>Performance by subject</h2>
+
+    {% if subject_scores %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Correct</th>
+                    <th>Questions</th>
+                    <th>Accuracy</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in subject_scores %}
+                <tr>
+                    <td>{{ s['name'] }}</td>
+                    <td>{{ s['correct'] or 0 }}</td>
+                    <td>{{ s['total'] }}</td>
+                    <td>
+                        {{ ((((s['correct'] or 0) * 100 / s['total'])
+                            if s['total'] else 0)|round(1)) }}%
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        Complete an attempt to see your performance.
+    </div>
+    {% endif %}
+</section>
+
+<section class="section">
+    <h2>Recent activity</h2>
+
+    {% if activity %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Questions answered</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in activity %}
+                <tr>
+                    <td>{{ a['activity_date'] }}</td>
+                    <td>{{ a['questions_answered'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        Your activity will appear here after you submit an exam.
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

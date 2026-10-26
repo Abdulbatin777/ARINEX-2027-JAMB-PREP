@@ -1,0 +1,140 @@
+
+{% extends "base.html" %}
+{% block title %}Question bank · ARINEX{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <p class="eyebrow">ADMIN / QUESTION BANK</p>
+    <h1>Manage questions</h1>
+    <p>Imported questions stay unpublished until you review them.</p>
+
+    <div class="button-row">
+        <a class="button" href="{{ url_for('admin_add_question') }}">
+            + Add question
+        </a>
+        <a class="button button-secondary"
+           href="{{ url_for('admin_import_questions') }}">
+            Import CSV
+        </a>
+    </div>
+</section>
+
+<form method="get" class="filter-bar">
+    <input name="search" value="{{ search }}"
+           placeholder="Search question text">
+
+    <select name="subject_id">
+        <option value="">All subjects</option>
+        {% for s in subjects %}
+        <option value="{{ s['id'] }}"
+            {% if subject_id == s['id'] %}selected{% endif %}>
+            {{ s['name'] }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <button class="button button-secondary" type="submit">
+        Filter
+    </button>
+</form>
+
+<section class="card" style="margin: 20px 0; padding: 20px;">
+    <h2>Publish questions in bulk</h2>
+    <p>
+        Select a subject to publish all eligible unpublished questions
+        belonging to it. Other subjects will not be affected.
+    </p>
+
+    <form method="post"
+          action="{{ url_for('admin_publish_all_questions') }}"
+          onsubmit="return confirm(
+              'Publish all eligible unpublished questions for this subject?'
+          );">
+
+        <input type="hidden" name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <label for="publish_subject_id">Choose subject</label>
+
+        <select id="publish_subject_id" name="subject_id" required>
+            <option value="">Select a subject</option>
+            {% for s in subjects %}
+            <option value="{{ s['id'] }}">{{ s['name'] }}</option>
+            {% endfor %}
+        </select>
+
+        <button class="button" type="submit"
+                style="margin-top: 12px;">
+            Publish All Questions
+        </button>
+    </form>
+</section>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subject</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Published</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for q in questions %}
+            <tr>
+                <td>{{ q['id'] }}</td>
+                <td>{{ q['subject_name'] }}</td>
+                <td>
+                    {{ q['question_text'][:100] }}
+                    {% if q['question_text']|length > 100 %}…{% endif %}
+                </td>
+                <td>{{ q['correct_answer'] }}</td>
+                <td>
+    <span class="publish-status">
+        {{ 'Yes' if q['is_published'] else 'No' }}
+    </span>
+</td>
+                <td class="table-actions">
+                    <button
+    type="button"
+    class="toggle-publish-button"
+    data-url="{{ url_for('admin_toggle_question_publish', question_id=q['id']) }}"
+    data-published="{{ 'true' if q['is_published'] else 'false' }}"
+>
+    {{ 'Unpublish' if q['is_published'] else 'Publish' }}
+</button>
+                    <a href="{{ url_for(
+                        'admin_edit_question',
+                        question_id=q['id']
+                    ) }}">Edit</a>
+
+                    <form method="post"
+                          action="{{ url_for(
+                              'admin_delete_question',
+                              question_id=q['id']
+                          ) }}">
+                        <input type="hidden" name="csrf_token"
+                               value="{{ csrf_token() }}">
+                        <button class="text-danger" type="submit"
+                                data-confirm="Delete or unpublish this question?">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    No questions yet. Add your own questions to start
+                    building the bank.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

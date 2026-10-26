@@ -1,0 +1,13 @@
+{
+  "name": "ARINEX 2027 JAMB PREP",
+  "short_name": "ARINEX JAMB",
+  "description": "Prepare for JAMB with practice, classes and CBT mock exams.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "icons": [
+    {"src": "/static/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

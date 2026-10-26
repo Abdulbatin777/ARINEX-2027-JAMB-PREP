@@ -1,0 +1,210 @@
+{% extends "base.html" %}{% block title %}{{ attempt['exam_type']|title }} exam · ARINEX{% endblock %}
+{% block content %}
+<section class="exam-top"><div><p class="eyebrow">{{ attempt['exam_type']|title }} session</p><h1>Question <span id="current-number">{{ current_question + 1 }}</span> of {{ questions|length }}</h1></div><div class="timer" id="exam-timer" data-seconds="{{ remaining_seconds }}">02:00:00</div></section>
+<div class="exam-layout"><aside class="question-nav"><h3>Questions</h3><div class="question-numbers">{% for q in questions %}<a class="question-number {% if loop.index0 == current_question %}current{% endif %} {% if q['selected_answer'] %}answered{% endif %}" href="{{ url_for('take_exam', attempt_id=attempt['id'], q=loop.index0) }}">{{ loop.index }}</a>{% endfor %}</div><p class="muted small">Green means answered.</p></aside>
+
+<section class="question-panel">
+
+<div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+    <button class="button button-secondary" type="button"
+            id="calculator-toggle" aria-expanded="false"
+            aria-controls="exam-calculator">
+        🖩 Calculator
+    </button>
+</div>
+
+<div id="exam-calculator" hidden
+     style="max-width:320px; margin:0 0 20px auto; padding:16px;
+            border:1px solid var(--border-color, #ccc);
+            border-radius:12px; background:var(--card-bg, #fff);
+            color:var(--text-color, #222);">
+
+    <h3 style="margin-top:0;">Exam Calculator</h3>
+
+    <input id="calculator-display" type="text" value="0"
+           readonly aria-label="Calculator display"
+           style="width:100%; box-sizing:border-box; padding:12px;
+                  margin-bottom:12px; text-align:right; font-size:24px;
+                  border:1px solid #aaa; border-radius:6px;">
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:7px;">
+        <button type="button" data-calc="clear">C</button>
+        <button type="button" data-calc="backspace">⌫</button>
+        <button type="button" data-calc="%">%</button>
+        <button type="button" data-calc="/">÷</button>
+
+        <button type="button" data-calc="7">7</button>
+        <button type="button" data-calc="8">8</button>
+        <button type="button" data-calc="9">9</button>
+        <button type="button" data-calc="*">×</button>
+
+        <button type="button" data-calc="4">4</button>
+        <button type="button" data-calc="5">5</button>
+        <button type="button" data-calc="6">6</button>
+        <button type="button" data-calc="-">−</button>
+
+        <button type="button" data-calc="1">1</button>
+        <button type="button" data-calc="2">2</button>
+        <button type="button" data-calc="3">3</button>
+        <button type="button" data-calc="+">+</button>
+
+        <button type="button" data-calc="sign">±</button>
+        <button type="button" data-calc="0">0</button>
+        <button type="button" data-calc=".">.</button>
+        <button type="button" data-calc="equals">=</button>
+    </div>
+
+    <button type="button" class="button button-secondary"
+            id="calculator-close" style="margin-top:12px; width:100%;">
+        Close calculator
+    </button>
+</div>
+
+{% if questions %}
+{% set qindex = current_question if current_question >= 0 and current_question < questions|length else 0 %}
+{% set q = questions[qindex] %}
+
+<div class="question-meta">
+    <span>{{ q['subject_name'] }}</span>
+    <span>Question {{ qindex + 1 }}</span>
+</div>
+
+{% set question_source = q['source']|default('', true)|trim %}
+{% set question_year = q['exam_year']|default('', true)|trim %}
+
+{% if question_source or question_year %}
+<div class="question-meta question-source">
+    {% if question_source %}
+        <span>Source: {{ question_source }}</span>
+    {% endif %}
+    {% if question_year %}
+        <span>Year: {{ question_year }}</span>
+    {% endif %}
+</div>
+{% endif %}
+<h2>{{ q['question_text'] }}</h2>
+<form method="post" id="answer-form" class="answer-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="question_id" value="{{ q['id'] }}"><input type="hidden" name="next_q" value="{{ qindex }}"><input type="hidden" name="action" value="save">
+<div class="answer-options">{% for letter in ['A','B','C','D'] %}<label class="answer-option"><input type="radio" name="answer" value="{{ letter }}" {% if q['selected_answer'] == letter %}checked{% endif %}><span class="option-letter">{{ letter }}</span><span>{{ q['option_' ~ letter|lower] }}</span></label>{% endfor %}</div>
+<div class="button-row between"><button class="button button-secondary" type="submit" name="go_to_q" value="{{ [qindex - 1, 0]|max }}" {% if qindex == 0 %}disabled{% endif %}>← Previous</button><button class="button" type="submit" name="go_to_q" value="{{ [qindex + 1, questions|length - 1]|min }}" {% if qindex + 1 >= questions|length %}disabled{% endif %}>Save & Next →</button></div></form>
+<div class="exam-footer"><form method="post" action="{{ url_for('toggle_bookmark', question_id=q['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-ghost" type="submit">☆ Bookmark this question</button></form>
+<form method="post" id="submit-exam-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="submit"><button class="button button-danger" type="submit" data-confirm="Submit this exam now? You cannot change answers after submission.">Submit exam</button></form></div>
+{% else %}<p>No questions are attached to this attempt.</p>{% endif %}
+</section></div>
+
+<script>
+(function () {
+    const toggle = document.getElementById("calculator-toggle");
+    const panel = document.getElementById("exam-calculator");
+    const display = document.getElementById("calculator-display");
+    const close = document.getElementById("calculator-close");
+
+    if (!toggle || !panel || !display || !close) return;
+
+    let current = "0";
+    let stored = null;
+    let operator = null;
+    let startNew = false;
+
+    function show() {
+        display.value = current;
+    }
+
+    function reset() {
+        current = "0";
+        stored = null;
+        operator = null;
+        startNew = false;
+        show();
+    }
+
+    function calculate() {
+        if (stored === null || !operator) return;
+
+        const a = stored;
+        const b = Number(current);
+        let result;
+
+        if (operator === "+") result = a + b;
+        else if (operator === "-") result = a - b;
+        else if (operator === "*") result = a * b;
+        else if (operator === "/") {
+            if (b === 0) {
+                current = "Cannot divide by zero";
+                stored = null;
+                operator = null;
+                startNew = true;
+                show();
+                return;
+            }
+            result = a / b;
+        }
+
+        current = String(Number(result.toPrecision(12)));
+        stored = null;
+        operator = null;
+        startNew = true;
+        show();
+    }
+
+    toggle.addEventListener("click", function () {
+        panel.hidden = !panel.hidden;
+        toggle.setAttribute("aria-expanded", String(!panel.hidden));
+    });
+
+    close.addEventListener("click", function () {
+        panel.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+    });
+
+    panel.querySelectorAll("[data-calc]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const key = button.dataset.calc;
+
+            if (key === "clear") {
+                reset();
+            } else if (key === "backspace") {
+                if (!startNew) current = current.slice(0, -1) || "0";
+                show();
+            } else if (key === "sign") {
+                if (current !== "0" && !isNaN(Number(current))) {
+                    current = String(-Number(current));
+                }
+                show();
+            } else if (key === "%") {
+                if (!isNaN(Number(current))) {
+                    current = String(Number(current) / 100);
+                }
+                startNew = true;
+                show();
+            } else if (["+", "-", "*", "/"].includes(key)) {
+                if (operator && !startNew) calculate();
+                stored = Number(current);
+                operator = key;
+                startNew = true;
+            } else if (key === "equals") {
+                calculate();
+            } else if (key === ".") {
+                if (startNew) {
+                    current = "0.";
+                    startNew = false;
+                } else if (!current.includes(".")) {
+                    current += ".";
+                }
+                show();
+            } else if (/^\d$/.test(key)) {
+                if (startNew || current === "0" || isNaN(Number(current))) {
+                    current = key;
+                    startNew = false;
+                } else {
+                    current += key;
+                }
+                show();
+            }
+        });
+    });
+
+    show();
+})();
+</script>
+{% endblock %}
+

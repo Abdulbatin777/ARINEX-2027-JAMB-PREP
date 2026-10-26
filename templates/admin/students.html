@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Students · ARINEX{% endblock %}
+{% block content %}<section class="page-heading"><p class="eyebrow">ADMIN / STUDENTS</p><h1>Student accounts</h1></section><div class="table-wrap"><table><thead><tr><th>Username</th><th>WhatsApp</th><th>Joined</th><th>Status</th><th>Access</th></tr></thead><tbody>{% for s in students %}<tr><td>{{ s['username'] }}</td><td>{{ s['whatsapp'] }}</td><td>{{ s['created_at'] }}</td><td>{{ 'Active' if s['is_active'] else 'Inactive' }}</td>
+    
+<td>
+    <a href="{{ url_for('admin_locks', user_id=s['id']) }}">Manage access</a>
+    |
+    <a href="{{ url_for('admin_reset_student_password', user_id=s['id']) }}">Reset Password</a>
+</td>
+</tr>{% else %}<tr><td colspan="5">No student accounts yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

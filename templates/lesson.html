@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block title %}{{ lesson['title'] }} · ARINEX{% endblock %}
+{% block content %}<article class="panel lesson-content"><p class="eyebrow">LESSON NOTE</p><h1>{{ lesson['title'] }}</h1><div class="lesson-body">{{ lesson['content'] }}</div><a class="button button-secondary" href="{{ url_for('classes') }}">← Back to classes</a></article>{% endblock %}
